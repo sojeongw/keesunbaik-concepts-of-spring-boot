@@ -1,24 +1,28 @@
 package me.whiteship;
 
+import org.springframework.hateoas.EntityModel;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
+@RestController
 public class SampleController {
 
-    @GetMapping("/exception")
-    public String exception() {
-        throw new SampleException();
-    }
+    @GetMapping("/hateoas")
+    public EntityModel<Hello> hello() {
+        Hello hello = new Hello();
+        hello.setPrefix("Hey, ");
+        hello.setName("keesun");
 
-    @ExceptionHandler(SampleException.class)
-    public @ResponseBody AppError sampleError(SampleException e) {
-        AppError appError = new AppError();
-        appError.setMessage("error.app.key");
-        appError.setReason("IDK");
+        // 링크 추가
+        EntityModel<Hello> helloResource = EntityModel.of(hello);
+        helloResource.add(linkTo(methodOn(SampleController.class).hello()).withSelfRel());
 
-        return appError;
+        return helloResource;
     }
 }
